@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="9004" basePath="/IBProps" doc:name="HTTP Listener Configuration"/>
+    <flow name="challenge4Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <logger message=" #['\n']&lt;&lt;===INBOUND==LOGGING=====&gt;&gt; #['\n'] #[message.inboundProperties]" level="INFO" doc:name="Logging IB Properties"/>
+        <set-property propertyName="typeOfProperty" value="OutBound" doc:name="Setting OB Property"/>
+        <set-variable variableName="date" value="#[server.dateTime]" doc:name="SettingTimeVariable"/>
+        <set-property propertyName="Time" value="#[flowVars.date]" doc:name="Setting OB Prop"/>
+        <logger message=" #['\n']&lt;&lt;==OUTBOUND===LOGGING=====&gt;&gt; #['\n'] #[message.outboundProperties]" level="INFO" doc:name="Logging OB Properties"/>
+        <set-payload value="Inboud Outbound properties explored !!" doc:name="Set Payload"/>
+    </flow>
+</mule>
