@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8002" doc:name="HTTP Listener Configuration"/>
+    <flow name="FlowA">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <set-variable variableName="flowVarriable1" value="F1" doc:name="flowVariable1"/>
+        <set-session-variable variableName="sessionVariable1" value="S1" doc:name="Session Variable1"/>
+        <logger message="FLOW A Request Scope Accessible Variables: #[flowVars.flowVarriable1] #[sessionVars.SessionVariable1] #[flowVars.flowVarriable2] #[sessionVars.SessionVariable2]" level="INFO" doc:name="Logger"/>
+        <vm:outbound-endpoint exchange-pattern="request-response" path="testQ" doc:name="VM"/>
+        <logger message="FLOW A Response Scope Accessible Variables: #[flowVars.flowVarriable1] #[sessionVars.SessionVariable1] #[flowVars.flowVarriable2] #[sessionVars.SessionVariable2]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="FlowB">
+        <vm:inbound-endpoint exchange-pattern="request-response" path="testQ" doc:name="VM"/>
+        <set-variable variableName="flowVarriable2" value="F2" doc:name="flowVariable2"/>
+        <set-session-variable variableName="sessionVariable2" value="s2" doc:name="Session Variable2"/>
+        <logger message="FLOW B Request Scope Accessible Variables: #[flowVars.flowVarriable1] #[sessionVars.SessionVariable1] #[flowVars.flowVarriable2] #[sessionVars.SessionVariable2]" level="INFO" doc:name="Logger"/>
+        <logger message="FLOW B Response Scope Accessible Variables: #[flowVars.flowVarriable1] #[sessionVars.SessionVariable1] #[flowVars.flowVarriable2] #[sessionVars.SessionVariable2]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
