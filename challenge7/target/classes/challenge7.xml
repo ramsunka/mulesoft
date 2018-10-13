@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="9007" doc:name="HTTP Listener Configuration"/>
+    <flow name="challenge7Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <set-variable variableName="greetMeVar" value="#[message.inboundProperties.'http.query.params'.greetString]" doc:name="greetMeVar"/>
+        <set-variable variableName="namevar" value="#[message.inboundProperties.'http.query.params'.name]" doc:name="nameVariable"/>
+        <logger message="#[flowVars.namevar.toString()]  #[flowVars.greetMeVar.toString()]" level="INFO" doc:name="BeforeConvLogger"/>
+        <logger message="#[flowVars.namevar.toString().toUpperCase()]  #[flowVars.greetMeVar.toString().toLowerCase()]" level="INFO" doc:name="AftrConvLogger"/>
+        <set-payload value="#[flowVars.namevar.toString().toUpperCase()]  #[flowVars.greetMeVar.toString().toLowerCase()]" doc:name="Set Payload"/>
+    </flow>
+</mule>
