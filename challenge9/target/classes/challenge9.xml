@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <flow name="filedemoFlow">
+        <file:inbound-endpoint path="C:\Users\ramsunka\AnypointStudio\filedemo"  responseTimeout="10000" doc:name="File">
+            <file:filename-regex-filter pattern=".*JSON" caseSensitive="true"/>
+        </file:inbound-endpoint>
+        <file:file-to-string-transformer doc:name="File to String"/>
+        <logger message="#[message]" level="INFO" doc:name="Logger"/>
+        <logger message="#[message.inboundProperties['originalFilename'].substring(0,message.inboundProperties['originalFilename'].indexOf('.'))]" level="INFO" doc:name="Logger"/>
+        <set-payload value="#[message.payload.toUpperCase()]" doc:name="Set Payload"/>
+        <file:outbound-endpoint path="C:\Users\ramsunka\AnypointStudio\filedemo" outputPattern="#[message.outboundProperties['filename'].substring(0,message.outboundProperties['filename'].indexOf('.'))].txt" responseTimeout="10000" doc:name="File"/>
+    </flow>
+</mule>
