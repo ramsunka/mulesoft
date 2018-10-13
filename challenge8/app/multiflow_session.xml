@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="9008" doc:name="HTTP Listener Configuration"/>
+    <flow name="challenge8Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <set-session-variable variableName="fName" value="#[message.inboundProperties.'http.query.params'.fName]" doc:name="FistName Session Variable"/>
+        <set-session-variable variableName="lName" value="#[message.inboundProperties.'http.query.params'.lName]" doc:name="LastNameSession Variable"/>
+        <set-payload value="Last Name is #[sessionVars.lName] and length is  #[sessionVars.lName.toString().length()]" doc:name="Set Payload"/>
+        <vm:outbound-endpoint exchange-pattern="one-way" path="myQueue" doc:name="VM"/>
+        <logger message="&lt;&lt;====Message After VM======&gt;&gt; #[message]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="challenge8Flow1">
+        <vm:inbound-endpoint exchange-pattern="one-way" path="myQueue" doc:name="VM"/>
+        <logger message="First name is #[sessionVars.fName] and Last Name is #[sessionVars.lName] with length of FistName= #[sessionVars.fName.toString().length()]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
