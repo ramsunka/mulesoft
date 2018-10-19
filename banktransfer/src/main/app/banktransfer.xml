@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8004" basePath="/bankacnt" doc:name="HTTP Listener Configuration"/>
+      <db:oracle-config name="Oracle_Configuration_TEST" host="host" port="1542" instance="Database" user="user" password="password" doc:name="Oracle Configuration"/>
+    <flow name="banktransferFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/transfer" allowedMethods="GET" doc:name="HTTP"/>
+        <logger message="#[message.inboundProperties.'http.query.params'.get('amount')]  #[message.inboundProperties.'http.query.params'.get('source')]" level="INFO" doc:name="Logger"/>
+        <db:select config-ref="Oracle_Configuration_TEST" doc:name="Balance check db">
+            <db:parameterized-query><![CDATA[select balance from XX_BANK_TEST
+where accid=#[message.inboundProperties.'http.query.params'.get('source')]]]></db:parameterized-query>
+        </db:select>
+        <choice doc:name="Choice">
+            <when expression="#[payload.get(0).balance &gt; message.inboundProperties.'http.query.params'.get('amount')]">
+                <transactional action="ALWAYS_BEGIN" doc:name="Transactional">
+                    <db:update config-ref="Oracle_Configuration_TEST" doc:name="UpdateSourceDatabase">
+                        <db:parameterized-query><![CDATA[update XX_BANK_TEST set balance=balance -#[message.inboundProperties.'http.query.params'.get('amount')] where accid=#[message.inboundProperties.'http.query.params'.get('source')]]]></db:parameterized-query>
+                    </db:update>
+                    <db:update config-ref="Oracle_Configuration_TEST" doc:name="UpdateDestinationAccount">
+                        <db:parameterized-query><![CDATA[update XX_BANK_TEST set balance=balance -#[message.inboundProperties.'http.query.params'.get('amount')]  where accid=#[message.inboundProperties.'http.query.params'.get('dest')]]]></db:parameterized-query>
+                    </db:update>
+                    <set-payload value="Money #[message.inboundProperties.'http.query.params'.get('amount')]  is transfered from Accnt #[message.inboundProperties.'http.query.params'.get('source')] to #[message.inboundProperties.'http.query.params'.get('dest')]" doc:name="Set Payload"/>
+                </transactional>
+            </when>
+            <otherwise>
+                <set-payload value="Insufficient amount in Bank Account " doc:name="Set Payload"/>
+            </otherwise>
+        </choice>
+        <logger message="#[message]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
