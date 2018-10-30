@@ -1,4 +1,3 @@
 # Mulesoft
-# Mule 3
 
-Beginner samples to learn Mule ESB
+Beginner samples to learn Mule ESB - Mule 3
