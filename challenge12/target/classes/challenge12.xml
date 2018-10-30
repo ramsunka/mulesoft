@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="9012" doc:name="HTTP Listener Configuration"/>
+    <flow name="challenge12Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/method" allowedMethods="GET,POST,PUT" doc:name="HTTP"/>
+        <logger message="Input method========#[message.inboundProperties.'http.method']" level="INFO" doc:name="Logger"/>
+        <set-payload value="You are invoked with #[message.inboundProperties.'http.method'] Method" doc:name="Set Payload"/>
+        <choice doc:name="Choice">
+            <when expression="#[message.inboundProperties.'http.method'=='PUT']">
+                <set-variable variableName="filename" value="put" doc:name="PUTVariable"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.method'=='POST']">
+                <set-variable variableName="filename" value="post" doc:name="POSTVariable"/>
+            </when>
+            <otherwise>
+                <set-variable variableName="filename" value="get" doc:name="GETVariable"/>
+            </otherwise>
+        </choice>
+        <file:outbound-endpoint path="C:\Users\ramsunka\AnypointStudio\filedemo" outputPattern="#[flowVars.filename].txt" responseTimeout="10000" doc:name="File"/>
+    </flow>
+</mule>
