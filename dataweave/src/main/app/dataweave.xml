@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8007" doc:name="HTTP Listener Configuration"/>
+    <ws:consumer-config name="Web_Service_Consumer" service="TshirtServicePortTypeService" port="TshirtServicePortTypePort" serviceAddress="http://tshirt-service.cloudhub.io/" wsdlLocation="http://tshirt-service.cloudhub.io/?wsdl" doc:name="Web Service Consumer"/>
+    <flow name="dataweaveFlow" doc:description="Here is the tutorial followed to develop this code.
+https://docs.mulesoft.com/mule-runtime/3.7/dataweave-tutorial">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/dw" allowedMethods="POST" metadata:id="3b0b7c42-f726-4c09-aa4d-eb9fcb7000a2" doc:name="HTTP" doc:description="Sample Input payload for this API:
+{
+&quot;product&quot;: {
+&quot;price&quot;: &quot;5&quot;,
+&quot;model&quot;: &quot;MuleSoft Connect 2015&quot;
+},
+&quot;item_amount&quot;: &quot;3&quot;,
+&quot;payment&quot;: {
+&quot;payment-type&quot;: &quot;credit-card&quot;,
+&quot;currency&quot;: &quot;USD&quot;,
+&quot;installments&quot;: &quot;1&quot;
+},
+&quot;buyer&quot;: {
+&quot;email&quot;: &quot;mike@hotmail.com&quot;,
+&quot;name&quot;: &quot;Michael&quot;,
+&quot;address&quot;: &quot;Koala Boulevard 314&quot;,
+&quot;city&quot;: &quot;San Diego&quot;,
+&quot;state&quot;: &quot;CA&quot;,
+&quot;postCode&quot;: &quot;1345&quot;,
+&quot;nationality&quot;: &quot;USA&quot;
+},
+&quot;shop&quot;: &quot;main branch&quot;,
+&quot;salesperson&quot;: &quot;Mathew Chow&quot;
+}"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:input-payload doc:sample="C:\Users\ramsunka\AnypointStudio\filedemo\inputSample.json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://mulesoft.org/tshirt-service
+---
+{
+	ns0#OrderTshirt: {
+		size: "M" unless payload.buyer.state == "TX" otherwise "XXL",
+		email: payload.buyer.email,
+		name: payload.buyer.name,
+		address1: payload.buyer.address,
+		address2: null,
+		city: payload.buyer.city,
+		stateOrProvince: payload.buyer.state,
+		postalCode: payload.buyer.postCode,
+		country: payload.buyer.nationality
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="Before invoking SOAP API============#[payload]" level="INFO" doc:name="Before invoking SOAP API-Logger"/>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="OrderTshirt" doc:name="Web Service Consumer" doc:description="Invoking SOAP API#http://tshirt-service.cloudhub.io/?wsdl
+"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML" doc:description="Logger statement is not pringting the output of SOAP API response as it is giving DOM object. Now we are manually converting to string using DOM to XMl connector"/>
+        <logger message="After invoking SOAP API====================#[payload]" level="INFO" doc:name="After invoking SOAP API-Logger"/>
+    </flow>
+</mule>
