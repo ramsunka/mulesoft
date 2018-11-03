@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="9013" doc:name="HTTP Listener Configuration"/>
+    <file:connector name="File" autoDelete="false" outputAppend="true" streaming="true" validateConnections="true" doc:name="File"/>
+    <flow name="Mainflow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/byjuCalci" allowedMethods="GET" doc:name="HTTP"/>
+        <expression-component doc:name="set variables"><![CDATA[flowVars.number1=message.inboundProperties.'http.query.params'.get('number1');
+flowVars.number2=message.inboundProperties.'http.query.params'.get('number2');]]></expression-component>
+        <flow-ref name="Addition" doc:name="Addition"/>
+        <set-variable variableName="payload1" value="#[payload]" doc:name="Variable"/>
+        <flow-ref name="Substraction" doc:name="Substraction"/>
+        <set-variable variableName="payload2" value="#[payload]" doc:name="Variable"/>
+        <flow-ref name="Multiplication" doc:name="Multiplication"/>
+        <set-variable variableName="payload3" value="#[payload]" doc:name="Variable"/>
+        <flow-ref name="Division" doc:name="Division"/>
+        <set-payload value="#[flowVars.payload1]  #['\n']
+#[flowVars.payload2]  #['\n']
+#[flowVars.payload3]  #['\n']
+#[payload]  #['\n']" doc:name="Set Payload"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <sub-flow name="Addition">
+        <set-payload value="Addition of #[flowVars.number1] and  #[flowVars.number2] is #[Integer.parseInt(flowVars.number1)+Integer.parseInt(flowVars.number2)]  #['\n']" doc:name="Addition Pyalod"/>
+        <set-variable variableName="createfile" value="Addition" doc:name="Variable"/>
+        <flow-ref name="CreateFileFlow" doc:name="CreateFileFlow"/>
+ </sub-flow>
+    <sub-flow name="Substraction">
+        <set-payload value="Substraction of #[flowVars.number1] and  #[flowVars.number2] is #[Integer.parseInt(flowVars.number1)- Integer.parseInt(flowVars.number2)]  #['\n']" doc:name="Substraction Payload"/>
+        <set-variable variableName="createfile" value="Substraction" doc:name="Variable"/>
+        <flow-ref name="CreateFileFlow" doc:name="CreateFileFlow"/>
+    </sub-flow>
+    <sub-flow name="Multiplication">
+        <set-payload value="Multiplication of #[flowVars.number1] and  #[flowVars.number2] is #[Integer.parseInt(flowVars.number1)*Integer.parseInt(flowVars.number2)]  #['\n']" doc:name="Multiplication Payload"/>
+        <set-variable variableName="createfile" value="Multiplication" doc:name="Variable"/>
+        <flow-ref name="CreateFileFlow" doc:name="CreateFileFlow"/>
+    </sub-flow>
+    <sub-flow name="Division">
+        <set-payload value="Division of #[flowVars.number1] and  #[flowVars.number2] is #[Integer.parseInt(flowVars.number1)/Integer.parseInt(flowVars.number2)]  #['\n']" doc:name="Divison Payload"/>
+        <set-variable variableName="createfile" value="Division" doc:name="Variable"/>
+        <flow-ref name="CreateFileFlow" doc:name="CreateFileFlow"/>
+    </sub-flow>
+    <sub-flow name="CreateFileFlow" doc:description="Resuing this flow in other subflows to create the file">
+        <logger message="Addition Payload=====#[payload]" level="INFO" doc:name="Logger"/>
+        <file:outbound-endpoint path="src/main/resources/" outputPattern="#[flowVars.createfile]" connector-ref="File" responseTimeout="10000" doc:name="File"/>
+    </sub-flow>
+</mule>
