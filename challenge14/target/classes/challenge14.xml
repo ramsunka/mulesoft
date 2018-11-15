@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="9014" doc:name="HTTP Listener Configuration"/>
+    <db:oracle-config name="Oracle_Configuration" host="dbc-pdv-2015-vip.cisco.com" port="1542" instance="DV3CSF.cisco.com" user="APPS" password="refrig3r8" doc:name="Oracle Configuration"/>
+    <flow name="challenge14Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/paramQuery" doc:name="HTTP"/>
+        <db:select config-ref="Oracle_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[select * from XX_BANK_TEST  where balance <= #[message.inboundProperties.'http.query.params'.get('salLimit')]]]></db:parameterized-query>
+        </db:select>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
