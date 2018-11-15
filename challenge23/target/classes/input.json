@@ -1,0 +1,14 @@
+{
+"flights": [
+{
+"code": "ER38sd",
+"price": 400,
+"origin": "MUA",
+"destination": "SFO",
+"departureDate": "2015/03/20",
+"planeType": "Boeing 737",
+"airlineName": "United",
+"emptySeats": 0
+}
+]
+}
