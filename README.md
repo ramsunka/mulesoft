@@ -18,5 +18,6 @@ http://ilt.mulesoft-training.com/essentials/delta?wsdl
 
 Learn RAML with below reference:
 
-# https://raml.org/developers/raml-100-tutorial
-# https://raml.org/developers/raml-200-tutorial
+https://raml.org/developers/raml-100-tutorial
+
+https://raml.org/developers/raml-200-tutorial
