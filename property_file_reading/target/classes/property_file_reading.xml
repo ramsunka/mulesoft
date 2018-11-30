@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:context="http://www.springframework.org/schema/context" xmlns:secure-property-placeholder="http://www.mulesoft.org/schema/mule/secure-property-placeholder" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:expression-language="http://www.mulesoft.org/schema/mule/expression-language-gw"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/expression-language-gw http://www.mulesoft.org/schema/mule/expression-language-gw/current/mule-expression-language-gw.xsd
+http://www.mulesoft.org/schema/mule/secure-property-placeholder http://www.mulesoft.org/schema/mule/secure-property-placeholder/current/mule-secure-property-placeholder.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    	
+   
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="${port}" doc:name="HTTP Listener Configuration" basePath="![p['basepath']]"/>
+    <http:request-config name="HTTP_Request_Configuration" host="ilt.mulesoft-training.com" port="80" basePath="/essentials" doc:name="HTTP Request Configuration"/>
+  
+    <expression-language:property-placeholder
+		location="learning_${env}.properties" />
+    <secure-property-placeholder:config name="Secure_Property_Placeholder" key="abcdefghijk" location="learning_${env}.properties" doc:name="Secure Property Placeholder"/>
+		
+    <flow name="property_file_readingFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="![p['path']]" doc:name="HTTP" allowedMethods="GET"/>
+        <logger message="&lt;=========we are in side mule flow========&gt;" level="INFO" doc:name="Logger"/>
+        <logger message="Approach #1: Reading a Properties File Using a curly braces Expression   ======&gt; ${basepath}" level="INFO" doc:name="Logger"/>
+        <logger message="Approach #2: Reading a Properties File Using a  square bracket Expression =====&gt;   ![p['username']]" level="INFO" doc:name="Logger"/>
+        <logger message="Approach #3: Reading a Properties File Using  Function from DataWeave" level="INFO" doc:name="Logger"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json	
+---
+{
+	status: "success",
+	timeconsumed: p("timeout")
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+</mule>
