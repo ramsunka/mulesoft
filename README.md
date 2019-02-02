@@ -21,3 +21,9 @@ Learn RAML with below reference:
 https://raml.org/developers/raml-100-tutorial
 
 https://raml.org/developers/raml-200-tutorial
+
+Mule training Database:
+Host:mudb.mulesoft-training.com
+Port:3306
+User/pwd:mule/mule
+Database:training
